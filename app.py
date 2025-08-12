@@ -89,11 +89,13 @@ except Exception:
 # CORS / App
 # =========================
 _default_origins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "https://mybodhi.netlify.app"
+    "http://localhost:3000",            # local React dev
+    "http://localhost:5173",            # local Vite dev
+    "http://localhost:5500",            # local static server
+    "http://127.0.0.1:5500",            # local static server (127.0.0.1 form)
+    "https://mybodhi.netlify.app",      # production frontend
+    "https://*.netlify.app",            # Netlify deploy previews & branches
+    "https://mybodhi-backend.onrender.com" # Render backend direct access
 ]
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", ",".join(_default_origins)).split(",") if o.strip()]
 
