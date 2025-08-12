@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Local state
+storage/progress.json
+storage/analytics.jsonl
+storage/moderation.jsonl
+
+# Chroma vectors (runtime or on persistent disk in prod)
+storage/chroma/
+
+# OS & editors
+.DS_Store
+.idea/
+.vscode/

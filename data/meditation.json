@@ -1,0 +1,34 @@
+{
+  "buddhism": {
+    "breath": [
+      "Sit upright, soften the jaw. Notice where the breath is felt most clearly.",
+      "Breathe naturally. On each inhale, silently note: 'in'; on each exhale, 'out'.",
+      "When attention wanders, kindly note 'thinking' and return to the breath.",
+      "Widen awareness to the whole body breathing. Allow the shoulders to drop.",
+      "Close with one deeper breath. Offer a simple wish: 'May I be at ease.'"
+    ],
+    "body_scan": [
+      "Lie or sit comfortably. Let the eyes rest or close.",
+      "Bring attention to the crown of the head; notice sensation, temperature, pressure.",
+      "Move slowly: face, throat, shoulders, arms, hands; notice and soften.",
+      "Scan chest, back, belly; if tension appears, breathe gently into that area.",
+      "Hips, legs, feet; sense the body as one field. Rest in the whole body."
+    ]
+  },
+  "zen": {
+    "breath": [
+      "Sit with a stable base. Hands in a simple mudra; gaze soft.",
+      "Follow the breath at the nose. Count 1 to 10; if lost, return to 1.",
+      "Let exhale lengthen slightly; allow thoughts to pass like clouds.",
+      "Feel the body breathe itself. Upright, easy, awake.",
+      "Release counting. Sit in just‑this. Bow gently at the end."
+    ],
+    "body_scan": [
+      "Settle into posture. Sense contact with the cushion or chair.",
+      "Awareness moves from crown to toes, touching each region lightly.",
+      "No fixing, no rejecting—just knowing sensations come and go.",
+      "Include sounds and space in awareness; nothing outside practice.",
+      "Return to simple sitting for a few breaths; end with one bow."
+    ]
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "buddhism": [
+    {
+      "id": "b_l1",
+      "title": "Four Noble Truths",
+      "objective": "Name and explain the four truths.",
+      "quote_id": "b4",
+      "exercise": "Journal: where do you notice craving pushing you today?"
+    },
+    {
+      "id": "b_l2",
+      "title": "Eightfold Path (View & Intention)",
+      "objective": "Describe right view and intention.",
+      "quote_id": "b6",
+      "exercise": "Write one wholesome intention for tomorrow."
+    },
+    {
+      "id": "b_l3",
+      "title": "Mindfulness in Daily Life",
+      "objective": "Apply mindfulness to a routine task.",
+      "quote_id": "b23",
+      "exercise": "Wash dishes or brush teeth with full attention for 3 minutes."
+    },
+    {
+      "id": "b_l4",
+      "title": "Loving‑Kindness",
+      "objective": "Practice metta phrases.",
+      "quote_id": "b13",
+      "exercise": "For 2 minutes: 'May I be safe… may others be safe.'"
+    },
+    {
+      "id": "b_l5",
+      "title": "Impermanence",
+      "objective": "Recognize change in body and mind.",
+      "quote_id": "b3",
+      "exercise": "Note 3 things that changed today, pleasant or not."
+    }
+  ],
+  "zen": [
+    {
+      "id": "z_l1",
+      "title": "Posture & Ordinary Mind",
+      "objective": "Sit simply; meet ordinary mind.",
+      "quote_id": "z2",
+      "exercise": "Sit 5 minutes; label thoughts 'planning', 'remembering', then return."
+    },
+    {
+      "id": "z_l2",
+      "title": "Koans as Pointers",
+      "objective": "Relate to a koan without solving.",
+      "quote_id": "z1",
+      "exercise": "Hold 'Mu' for 3 minutes without analysis."
+    },
+    {
+      "id": "z_l3",
+      "title": "Everyday Suchness",
+      "objective": "Notice the Way in ordinary acts.",
+      "quote_id": "z12",
+      "exercise": "Choose one meal to eat without phone; just taste and chew."
+    },
+    {
+      "id": "z_l4",
+      "title": "Letting Go",
+      "objective": "Feel non‑grasping for a moment.",
+      "quote_id": "z25",
+      "exercise": "Exhale fully and soften the belly; let the shoulders drop."
+    },
+    {
+      "id": "z_l5",
+      "title": "Form & Emptiness",
+      "objective": "Sense form and space together.",
+      "quote_id": "z10",
+      "exercise": "Notice the space around sounds for one minute."
+    }
+  ]
+}
