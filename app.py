@@ -431,14 +431,18 @@ def chat(req: ChatReq):
             if not last_assistant:
                 raise HTTPException(status_code=400, detail="No prior koan to explain.")
 
-            resp = client_ai.responses.create(
+            resp = client_ai.chat.completions.create(
                 model="gpt-4o-mini",
-                instructions="Explain ONLY this koan in ~50 words, clearly and compassionately. No new koans.",
-                input=[{"role":"user","content": f"KOAN:\n{last_assistant}"}],
-                max_output_tokens=200, temperature=0.6
+                messages=[
+                    {"role": "system", "content": "Explain ONLY this koan in ~50 words, clearly and compassionately. No new koans."},
+                    {"role": "user",   "content": f"KOAN:\n{last_assistant}"},
+                ],
+                max_tokens=200,
+                temperature=0.6,
             )
-            answer = cap_words(resp.output_text or "", max_w=60)
+            answer = cap_words((resp.choices[0].message.content or "").strip(), max_w=60)
             usage = getattr(resp, "usage", None) or {}
+
             log_analytics("zen-explain", getattr(usage, "input_tokens", 0) or 0, getattr(usage, "output_tokens", 0) or 0)
             add_xp(req.user_id, 3)
             return {"answer": answer, "quote": "", "source": ""}
@@ -478,16 +482,24 @@ def chat(req: ChatReq):
             )
             instructions = f"{BODHI_PERSONA}\n\n{DISCLAIMER}"
 
-        msgs.append({"role":"user","content": user_prompt})
+        # Build chat messages: system first, then prior turns, then the current user prompt
+        chat_msgs = [{"role": "system", "content": instructions}]
+        if req.history:
+            for t in req.history:
+                u = t.get("user") if isinstance(t, dict) else getattr(t, "user", None)
+                a = t.get("assistant") if isinstance(t, dict) else getattr(t, "assistant", None)
+                if u: chat_msgs.append({"role":"user","content":u})
+                if a: chat_msgs.append({"role":"assistant","content":a})
+        chat_msgs.append({"role":"user","content": user_prompt})
 
-        resp = client_ai.responses.create(
+        resp = client_ai.chat.completions.create(
             model="gpt-4o-mini",
-            instructions=instructions,
-            input=msgs,
-            max_output_tokens=300,
-            temperature=0.7
+            messages=chat_msgs,
+            max_tokens=300,
+            temperature=0.7,
         )
-        answer = resp.output_text or ""
+        answer = (resp.choices[0].message.content or "").strip()
+
         if zen_mode:
             remember_koan(session_id, answer)
 
