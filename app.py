@@ -63,6 +63,19 @@ LESSONS = _load_json(LESSONS_PATH, {
     ]
 })
 
+TRAD_ALIASES = {
+    "buddhism": "buddhism",
+    "buddhist": "buddhism",
+    "buddhism (bodhi)": "buddhism",
+    "bodhi": "buddhism",
+    "zen": "zen",
+    "bonsai": "zen",
+}
+def canon_trad(s: str) -> str | None:
+    if not s: return None
+    k = re.sub(r"\s+", " ", s.strip().lower())
+    return TRAD_ALIASES.get(k, k if k in {"buddhism","zen"} else None)
+
 # =========================
 # OpenAI + Chroma
 # =========================
@@ -72,6 +85,33 @@ COLLECTION = "quotes_v1"
 ef = OpenAIEmbeddingFunction(api_key=API_KEY, model_name="text-embedding-3-small")
 client_vec = chromadb.PersistentClient(path=CHROMA_DIR)
 col = client_vec.get_or_create_collection(name=COLLECTION, embedding_function=ef)
+def seed_chroma_from_csv():
+    try:
+        if col.count() > 0:   # already seeded
+            return
+    except Exception:
+        pass
+    if not os.path.exists(QUOTES_CSV_PATH):
+        return
+    ids, docs, metas = [], [], []
+    with open(QUOTES_CSV_PATH, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            qid = (row.get("id") or "").strip() or f"row-{len(ids)+1}"
+            quote = (row.get("clean_quote") or row.get("quote") or "").strip()
+            if not quote: continue
+            tcanon = canon_trad(row.get("tradition","")) or "buddhism"
+            ids.append(qid)
+            docs.append(quote)
+            metas.append({
+                "id": qid,
+                "tradition": tcanon,
+                "source_ref": row.get("source_ref",""),
+                "tags": row.get("tags",""),
+            })
+    if docs:
+        col.add(ids=ids, documents=docs, metadatas=metas)
+
+seed_chroma_from_csv()
 
 # fallback quotes index (by id) for /lesson/next
 QUOTE_INDEX: Dict[str, Dict[str, str]] = {}
@@ -240,29 +280,41 @@ def check_moderation(openai_client: OpenAI, text: str, session_id: str, mode: st
     return flagged
 
 def retrieve_quote(tradition: str, query: str):
-    results = col.query(
-        query_texts=[query],
-        n_results=10,
-        where={"tradition": {"$eq": tradition}},
-        include=["documents", "metadatas"],
-    )
-    if not results.get("documents") or not results["documents"][0]:
-        return None
+    # try with filter
+    results = None
+    try:
+        results = col.query(
+            query_texts=[query],
+            n_results=10,
+            where={"tradition":{"$eq":tradition}},
+            include=["documents","metadatas"],
+        )
+    except Exception:
+        results = None
 
+    # fallback: no filter
+    if not results or not results.get("documents") or not results["documents"][0]:
+        try:
+            results = col.query(
+                query_texts=[query],
+                n_results=10,
+                include=["documents","metadatas"],
+            )
+        except Exception:
+            results = None
+
+    if not results or not results.get("documents") or not results["documents"][0]:
+        return None
     passages = results["documents"][0]
-    metas    = results["metadatas"][0]
+    metas    = results.get("metadatas",[[]])[0] or [{}]*len(passages)
 
     emb_inp = [query] + passages
     emb = client_ai.embeddings.create(model="text-embedding-3-small", input=emb_inp)
     vecs = [d.embedding for d in emb.data]
-    query_embedding = vecs[0]
-    passage_embeddings = vecs[1:]
-
-    best = rerank_passages(query_embedding, passages, passage_embeddings, query, topn=1)[0]
+    best = rerank_passages(vecs[0], passages, vecs[1:], query, topn=1)[0]
     idx  = passages.index(best)
     meta = metas[idx] if idx < len(metas) else {}
-
-    return {"quote": best, "source_ref": meta.get("source_ref", ""), "tags": meta.get("tags", "")}
+    return {"quote": best, "source_ref": meta.get("source_ref",""), "tags": meta.get("tags","")}
 
 # =========================
 # Personas / prompts
@@ -350,7 +402,8 @@ def progress(req: ProgressReq):
 @app.post("/chat")
 def chat(req: ChatReq):
     try:
-        trad = (req.tradition or "").strip().lower()
+        trad = canon_trad(req.tradition or "") or "buddhism"
+        zen_mode = (trad == "zen") or ((req.mode or "").strip().lower() == "zen")
         if trad not in {"buddhism", "zen"}:
             raise HTTPException(status_code=400, detail="tradition must be 'buddhism' or 'zen'")
 
@@ -400,7 +453,8 @@ def chat(req: ChatReq):
         # Retrieve + LLM
         ctx = retrieve_quote(trad, req.text)
         if not ctx:
-            raise HTTPException(status_code=404, detail="No matching passage found.")
+            add_xp(req.user_id, 2)
+            return {"answer":"Be where your feet are. One breath at a time.","quote":"","source":""}
 
         msgs = []
         if req.history:
